@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Someone Special ❤️</title>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+:root{
+--pink:#ff4d88;
+--soft:#fff0f5;
+--bg:#0b0b0f;
+}
+
+body,html{
+margin:0;
+padding:0;
+background:var(--bg);
+color:white;
+font-family:'Segoe UI',sans-serif;
+overflow:hidden;
+}
+
+/* SCREENS */
+.screen{
+height:100vh;
+width:100vw;
+display:flex;
+align-items:center;
+justify-content:center;
+position:absolute;
+transition:.4s ease;
+}
+.hidden{opacity:0;pointer-events:none;}
+
+.card{
+background:rgba(255,255,255,.06);
+backdrop-filter:blur(12px);
+border-radius:25px;
+padding:30px;
+width:85%;
+max-width:420px;
+text-align:center;
+box-shadow:0 0 25px rgba(255,77,136,.2);
+}
+
+.highlight{color:var(--pink);}
+
+button{
+background:var(--pink);
+border:none;
+color:white;
+padding:10px 18px;
+border-radius:20px;
+cursor:pointer;
+margin:6px;
+transition:.2s;
+}
+button:hover{transform:scale(1.05);}
+
+.gif{
+width:110px;
+margin:auto;
+}
+.gif img{
+width:100%;
+border-radius:20px;
+}
+
+/* SLIDER */
+.slider{
+width:100%;
+height:55px;
+background:rgba(255,255,255,.1);
+border-radius:30px;
+margin-top:20px;
+position:relative;
+}
+.handle{
+position:absolute;
+width:45px;
+height:45px;
+background:white;
+border-radius:50%;
+top:5px;
+left:5px;
+display:flex;
+align-items:center;
+justify-content:center;
+color:black;
+cursor:pointer;
+}
+
+/* VOICE NOTE DECORATION */
+.voice-box{
+background:linear-gradient(135deg,#fff,#ffe6f2);
+color:#333;
+border-radius:20px;
+padding:20px;
+margin-top:15px;
+box-shadow:0 8px 25px rgba(255,77,136,.3);
+border:2px solid var(--pink);
+position:relative;
+}
+
+.voice-box::before{
+content:"💌";
+position:absolute;
+top:-15px;
+left:20px;
+font-size:25px;
+background:white;
+padding:5px 8px;
+border-radius:50%;
+}
+
+.voice-title{
+color:var(--pink);
+font-weight:bold;
+margin-bottom:10px;
+}
+
+/* GREETING PAGES */
+.page-container{
+position:relative;
+overflow:hidden;
+height:260px;
+margin-top:10px;
+}
+
+.page{
+position:absolute;
+width:100%;
+height:100%;
+background:linear-gradient(135deg,#fff,#ffe6f2);
+color:#333;
+border-radius:20px;
+padding:25px;
+box-sizing:border-box;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+font-size:18px;
+line-height:1.6;
+transition:transform .5s ease, opacity .5s ease;
+box-shadow:0 8px 25px rgba(0,0,0,.3);
+}
+
+.page h2{color:var(--pink);}
+
+.page.inactive-left{
+transform:translateX(-100%);
+opacity:0;
+}
+
+.page.inactive-right{
+transform:translateX(100%);
+opacity:0;
+}
+
+.heart{
+color:var(--pink);
+font-size:22px;
+}
+
+/* POLAROID STYLE */
+.polaroid-wrapper{
+overflow:hidden;
+margin-top:20px;
+}
+
+.polaroid-track{
+display:flex;
+transition:transform .5s ease;
+}
+
+.polaroid-slide{
+min-width:100%;
+display:flex;
+justify-content:center;
+}
+
+.polaroid{
+background:white;
+padding:15px 15px 35px 15px;
+border-radius:8px;
+box-shadow:0 10px 25px rgba(0,0,0,.4);
+width:75%;
+max-width:280px;
+transform:rotate(-2deg);
+transition:.3s ease;
+}
+
+.polaroid img{
+width:100%;
+display:block;
+border-radius:4px;
+}
+
+.polaroid-note{
+margin-top:15px;
+text-align:center;
+font-family:'Comic Sans MS', cursive;
+color:#333;
+font-size:14px;
+}
+
+/* Slight random tilt for realism */
+.polaroid-slide:nth-child(2) .polaroid{
+transform:rotate(2deg);
+}
+.polaroid-slide:nth-child(3) .polaroid{
+transform:rotate(-1deg);
+}
+
+.open-btn{
+margin-top:20px;
+padding:14px 25px;
+font-size:16px;
+border-radius:30px;
+background:linear-gradient(135deg,#ff4d88,#ff80aa);
+box-shadow:0 8px 20px rgba(255,77,136,.4);
+animation:pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow{
+0%{transform:scale(1);}
+50%{transform:scale(1.05);}
+100%{transform:scale(1);}
+}
+
+.swipe-hint{
+margin-top:8px;
+font-size:14px;
+color:#ff4d88;
+display:flex;
+justify-content:center;
+align-items:center;
+gap:8px;
+font-weight:500;
+}
+
+.arrow{
+display:inline-block;
+animation:swipeMove 1.2s infinite;
+}
+
+.arrow:last-child{
+animation-delay:0.3s;
+}
+
+@keyframes swipeMove{
+0%{transform:translateX(0);opacity:0.5;}
+50%{transform:translateX(8px);opacity:1;}
+100%{transform:translateX(0);opacity:0.5;}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Background Music -->
+<audio id="bgMusic" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2b6f47db09.mp3?filename=romantic-piano-110624.mp3" type="audio/mp3">
+</audio>
+<!-- SCREEN 1 -->
+<div id="s1" class="screen">
+    <div class="card">
+    
+    <div class="gif">
+    <img src="bubu-dudu-sseeyall.gif">
+    </div>
+    
+    <h2>A Special Day for <span class="highlight">Someone Special</span></h2>
+    
+    <p style="margin-top:10px;">
+    I made something cute for you 🥹💗
+    </p>
+    
+    <button onclick="unlock()" class="open-btn">
+    Open Your Surprise 🎁✨
+    </button>
+    
+    </div>
+    </div>
+
+<!-- SCREEN 2 -->
+<div id="s2" class="screen hidden">
+    <div class="card">
+    
+    <h2 class="highlight">Happy 16th Birthday My Specialest One 🎂💖✨</h2>
+    
+    <p style="margin-top:15px;font-size:16px;line-height:1.6;">
+    Today is not just your birthday… it’s the day the universe decided 
+    to send the most precious soul into this world 🌍💫  
+    And somehow… I got lucky enough to know you 🥹💕  
+    
+    You deserve endless happiness 😌🌸  
+    infinite smiles 😊✨  
+    warm hugs 🤗💞  
+    and all the love this world can give 💗🌷  
+    
+    Stay the softest, cutest, brightest human ever 🧸🌟  
+    because you make my world so much better just by existing 💌❤️
+    </p>
+    
+    <div style="margin-top:15px;font-size:22px;">
+    🎉🎈🎂💖🌸✨🥰💕🌷🎀
+    </div>
+    
+    <button onclick="nextScreen()">Next 💕</button>
+    
+    </div>
+    </div>
+
+<!-- SCREEN 3 (DECORATED VOICE NOTE) -->
+<div id="s3" class="screen hidden">
+<div class="card">
+<h2>Your First Voice Note 🎙</h2>
+
+<div class="voice-box">
+<div class="voice-title">The one I'll never delete ❤️</div>
+<audio controls style="width:100%">
+<source src="voice-note.mp3">
+</audio>
+<p style="margin-top:10px;font-size:14px;">
+A simple recording that became my favorite song
+</p>
+</div>
+
+<button onclick="prevScreen()">Back</button>
+<button onclick="nextScreen()">Next</button>
+</div>
+</div>
+
+<!-- SCREEN 4 (POLAROID MEMORIES) -->
+<div id="s4" class="screen hidden">
+<div class="card">
+
+<h2>Our Memories 📸💞</h2>
+
+<!-- Swipe hint -->
+<div class="swipe-hint">
+    <span class="arrow">←</span>
+    Swipe
+    <span class="arrow">→</span>
+</div>
+
+<div class="polaroid-wrapper">
+    <div class="polaroid-track" id="polaroidTrack">
+
+        <!-- PHOTO 1 -->
+        <div class="polaroid-slide">
+            <div class="polaroid">
+                <img src="pic1.jpg">
+                <div class="polaroid-note">
+                    When I heard your voice for first time, I knew now found my new favorite singer🎤✨
+                </div>
+            </div>
+        </div>
+
+        <!-- PHOTO 2 -->
+        <div class="polaroid-slide">
+            <div class="polaroid">
+                <img src="pic2.jpg">
+                <div class="polaroid-note">
+                    Some random videos that officially stole my heart🎥❤️
+                </div>
+            </div>
+        </div>
+
+        <!-- PHOTO 3 -->
+        <div class="polaroid-slide">
+            <div class="polaroid">
+                <img src="pic3.jpg">
+                <div class="polaroid-note">
+                    This is when I confessed my feelings. I was so nervous to hit 'send' but it turned out to be the best decision I ever made📱✨
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div style="margin-top:20px;">
+<button onclick="prevScreen()">Back</button>
+<button onclick="nextScreen()">Next</button>
+</div>
+
+</div>
+</div>
+
+<!-- SCREEN 5 -->
+<div id="s5" class="screen hidden">
+    <div class="card">
+    
+    
+    </div>
+    
+    <div style="margin-top:15px;">
+    <button onclick="prevScreen()">Back</button>
+    <button onclick="prevLetter()">◀</button>
+    <button onclick="nextLetter()">▶</button>
+    </div>
+    
+    </div>
+    </div>
+
+    <script>
+
+        /* ===============================
+           SCREEN NAVIGATION SYSTEM
+        ================================= */
+        
+        let current = 1;
+        
+        function show(id){
+            for(let i=1;i<=5;i++){
+                document.getElementById("s"+i).classList.add("hidden");
+            }
+            document.getElementById("s"+id).classList.remove("hidden");
+        
+            // Reset birthday letter when entering screen 5
+            if(id === 5){
+                letterIndex = 0;
+                updateLetters();
+            }
+        }
+        
+        function nextScreen(){
+            if(current < 5){
+                current++;
+                show(current);
+            }
+        }
+        
+        function prevScreen(){
+            if(current > 1){
+                current--;
+                show(current);
+            }
+        }
+        
+        /* ===============================
+           UNLOCK BUTTON (NO SLIDER)
+        ================================= */
+        
+        function unlock(){
+            current = 2;
+            show(current);
+        
+            confetti({
+                particleCount:35,
+                spread:60
+            });
+        
+            const music = document.getElementById("bgMusic");
+            music.volume = 0.4;
+            music.play();
+        }
+        
+        /* ===============================
+           POLAROID SWIPE SYSTEM
+        ================================= */
+        
+        const polaroidTrack = document.getElementById("polaroidTrack");
+        let polaroidIndex = 0;
+        let startXPol = 0;
+        let draggingPol = false;
+        const totalPolaroids = 3;
+        
+        function updatePolaroid(){
+            polaroidTrack.style.transform =
+                `translateX(-${polaroidIndex * 100}%)`;
+        }
+        
+        /* TOUCH SUPPORT */
+        polaroidTrack.addEventListener("touchstart", e=>{
+            startXPol = e.touches[0].clientX;
+        });
+        
+        polaroidTrack.addEventListener("touchend", e=>{
+            let endX = e.changedTouches[0].clientX;
+            let diff = endX - startXPol;
+        
+            if(diff < -50 && polaroidIndex < totalPolaroids - 1){
+                polaroidIndex++;
+            }
+            else if(diff > 50 && polaroidIndex > 0){
+                polaroidIndex--;
+            }
+        
+            updatePolaroid();
+        });
+        
+        /* MOUSE SUPPORT */
+        polaroidTrack.addEventListener("mousedown", e=>{
+            draggingPol = true;
+            startXPol = e.clientX;
+        });
+        
+        window.addEventListener("mouseup", e=>{
+            if(!draggingPol) return;
+        
+            draggingPol = false;
+            let diff = e.clientX - startXPol;
+        
+            if(diff < -50 && polaroidIndex < totalPolaroids - 1){
+                polaroidIndex++;
+            }
+            else if(diff > 50 && polaroidIndex > 0){
+                polaroidIndex--;
+            }
+        
+            updatePolaroid();
+        });
+        
+        /* ===============================
+           BIRTHDAY LETTER PAGE SYSTEM
+        ================================= */
+        
+        let letterIndex = 0;
+        const totalLetters = 5;
+        
+        function updateLetters(){
+            for(let i=0;i<totalLetters;i++){
+                let page = document.getElementById("letter"+i);
+        
+                if(i < letterIndex){
+                    page.className = "page inactive-left";
+                }
+                else if(i === letterIndex){
+                    page.className = "page";
+                }
+                else{
+                    page.className = "page inactive-right";
+                }
+            }
+        }
+        
+        function nextLetter(){
+            if(letterIndex < totalLetters - 1){
+                letterIndex++;
+                updateLetters();
+            }
+        }
+        
+        function prevLetter(){
+            if(letterIndex > 0){
+                letterIndex--;
+                updateLetters();
+            }
+        }
+        
+        /* Initialize first state */
+        updateLetters();
+        
+        </script>
+
+</body>
+</html>
